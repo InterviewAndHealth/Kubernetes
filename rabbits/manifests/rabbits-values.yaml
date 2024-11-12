@@ -1,0 +1,64 @@
+## @section Global parameters
+## @param global.defaultStorageClass Global default StorageClass for Persistent Volume(s)
+global:
+  defaultStorageClass: gp3
+
+## Bitnami RabbitMQ image version
+## ref: https://hub.docker.com/r/bitnami/rabbitmq/tags/
+## @param image.registry [default: REGISTRY_NAME] RabbitMQ image registry
+## @param image.repository [default: REPOSITORY_NAME/rabbitmq] RabbitMQ image repository
+## @skip image.tag RabbitMQ image tag (immutable tags are recommended)
+image:
+  registry: docker.io
+  repository: bitnami/rabbitmq
+  tag: '4.0.3'
+  
+## @section Common parameters
+## @param nameOverride String to partially override rabbitmq.fullname template (will maintain the release name)
+nameOverride: rabbitmq
+
+## @param fullnameOverride String to fully override rabbitmq.fullname template
+fullnameOverride: rabbitmq
+
+## @param namespaceOverride String to fully override common.names.namespace
+namespaceOverride: rabbits
+
+## RabbitMQ Authentication parameters
+auth:
+  ## @param auth.username RabbitMQ application username
+  ## ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
+  username: iamreadyai-rabbit-user
+  ## @param auth.existingPasswordSecret Existing secret with RabbitMQ credentials (existing secret must contain a value for `rabbitmq-password` key or override with setting auth.existingSecretPasswordKey)
+  existingPasswordSecret: rabbits-secret
+  ## @param auth.existingErlangSecret Existing secret with RabbitMQ Erlang cookie (must contain a value for `rabbitmq-erlang-cookie` key or override with auth.existingSecretErlangKey)
+  ## e.g:
+  ## existingErlangSecret: name-of-existing-secret
+  ##
+  existingErlangSecret: rabbits-secret
+  
+## @param plugins List of default plugins to enable (should only be altered to remove defaults; for additional plugins use `extraPlugins`)
+plugins: "rabbitmq_management rabbitmq_peer_discovery_k8s"
+
+## Container Ports
+## @param containerPorts.amqp
+## @param containerPorts.amqpTls
+## @param containerPorts.dist
+## @param containerPorts.manager
+## @param containerPorts.epmd
+## @param containerPorts.metrics
+containerPorts:
+  amqp: 5672
+  amqpTls: 5671
+  dist: 25672
+  manager: 15672
+  epmd: 4369
+  metrics: 9419
+
+## @param replicaCount Number of RabbitMQ replicas to deploy
+replicaCount: 2
+
+## @section Persistence parameters
+persistence:
+  ## @param persistence.size PVC Storage Request for RabbitMQ data volume
+  ## If you change this value, you might have to adjust `rabbitmq.diskFreeLimit` as well
+  size: 8Gi

@@ -1,0 +1,68 @@
+## @section Global parameters
+## @param global.defaultStorageClass Global default StorageClass for Persistent Volume(s)
+## @param global.postgresql.username PostgreSQL username (overrides `postgresql.username`)
+## @param global.postgresql.password PostgreSQL password (overrides `postgresql.password`)
+## @param global.postgresql.existingSecret Name of existing secret to use for PostgreSQL passwords (overrides `postgresql.existingSecret`)
+## @param global.pgpool.adminUsername Pgpool Admin username (overrides `pgpool.adminUsername`)
+## @param global.pgpool.adminPassword Pgpool Admin password (overrides `pgpool.adminPassword`)
+## @param global.pgpool.existingSecret Pgpool existing secret
+global:
+  defaultStorageClass: gp3
+  postgresql:
+    username: iamreadyai-postgres-user
+    existingSecret: postgres-secret
+  pgpool:
+    adminUsername: iamreadyai-pgpool-admin
+    existingSecret: pgpool-secret
+
+## @section Common parameters
+## @param nameOverride String to partially override common.names.fullname template (will maintain the release name)
+nameOverride: postgresql
+
+## @param fullnameOverride String to fully override common.names.fullname template
+fullnameOverride: postgresql
+
+## @param namespaceOverride String to fully override common.names.namespace
+namespaceOverride: postgres
+
+## PostgreSQL parameters
+postgresql:
+  ## Bitnami PostgreSQL with Repmgr image
+  ## ref: https://hub.docker.com/r/bitnami/postgresql/tags/
+  ## @param postgresql.image.registry [default: REGISTRY_NAME] PostgreSQL with Repmgr image registry
+  ## @param postgresql.image.repository [default: REPOSITORY_NAME/postgresql-repmgr] PostgreSQL with Repmgr image repository
+  ## @skip postgresql.image.tag PostgreSQL with Repmgr image tag
+  image:
+    registry: docker.io
+    repository: bitnami/postgresql-repmgr
+    tag: '16.4.0'
+  ## @param postgresql.replicaCount Number of replicas to deploy. Use an odd number. Having 3 replicas is the minimum to get quorum when promoting a new primary.
+  replicaCount: 3
+  ## @param postgresql.containerPorts.postgresql PostgreSQL port
+  containerPorts:
+    postgresql: 5432
+  ## @param witness.initdbScripts Dictionary of initdb scripts
+  ## Specify dictionary of scripts to be run at first boot
+  ## The allowed extensions are `.sh`, `.sql` and `.sql.gz`
+  initdbScripts:
+    init.sql: |
+      CREATE DATABASE users_db;
+      CREATE DATABASE payments_db;
+      CREATE DATABASE interviews_db;
+
+## Pgpool parameters
+pgpool:
+  ## Bitnami Pgpool image
+  ## ref: https://hub.docker.com/r/bitnami/pgpool/tags/
+  ## @param pgpool.image.registry [default: REGISTRY_NAME] Pgpool image registry
+  ## @param pgpool.image.repository [default: REPOSITORY_NAME/pgpool] Pgpool image repository
+  ## @skip pgpool.image.tag Pgpool image tag
+  image:
+    registry: docker.io
+    repository: bitnami/pgpool
+    tag: '4.5.4'
+
+## Persistent Volume parameters
+persistence:
+  ## @param persistence.size Persistent Volume Claim size
+  size: 10Gi

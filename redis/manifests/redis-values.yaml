@@ -1,0 +1,109 @@
+## @section Global parameters
+## @param global.defaultStorageClass Global default StorageClass for Persistent Volume(s)
+global:
+  defaultStorageClass: gp3
+
+## @section Common parameters
+## @param nameOverride String to partially override common.names.fullname
+nameOverride: redis
+
+## @param fullnameOverride String to fully override common.names.fullname
+fullnameOverride: redis
+
+## @param namespaceOverride String to fully override common.names.namespace
+namespaceOverride: redis
+
+## Bitnami Redis&reg; image
+## ref: https://hub.docker.com/r/bitnami/redis/tags/
+## @param image.registry [default: REGISTRY_NAME] Redis&reg; image registry
+## @param image.repository [default: REPOSITORY_NAME/redis] Redis&reg; image repository
+## @skip image.tag Redis&reg; image tag (immutable tags are recommended)
+image:
+  registry: docker.io
+  repository: bitnami/redis
+  tag: '7.4.1'
+
+## Redis&reg; Authentication parameters
+auth:
+  ## @param auth.existingSecret The name of an existing secret with Redis&reg; credentials
+  existingSecret: redis-secret
+  
+## @param commonConfiguration [string] Common configuration to be added into the ConfigMap
+## ref: https://redis.io/topics/config
+commonConfiguration: |-
+  # Enable AOF https://redis.io/topics/persistence#append-only-file
+  appendonly yes
+  
+  # Disable RDB persistence, AOF persistence already enabled.
+  save ""
+
+  # Load Redis&reg; modules
+  loadmodule /modules/rediscompat.so
+  loadmodule /modules/redisearch.so
+  loadmodule /modules/redistimeseries.so
+  loadmodule /modules/rejson.so
+  loadmodule /modules/redisbloom.so
+  loadmodule /modules/redisgears.so v8-plugin-path /modules/libredisgears_v8_plugin.so
+
+  # Enable Redis&reg; key-space notifications
+  notify-keyspace-events Kx
+
+## @section Redis&reg; master configuration parameters
+master:
+  ## @param master.count Number of Redis&reg; master instances to deploy (experimental, requires additional configuration)
+  count: 1
+  ## @param master.containerPorts.redis Container port to open on Redis&reg; master nodes
+  containerPorts:
+    redis: 6379
+  ## @param master.initContainers Add additional init containers to the Redis&reg; master pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers:
+    - name: install-modules
+      image: redis/redis-stack-server:7.4.0-v1
+      command: ['sh', '-c', 'cp -r /opt/redis-stack/lib/* /modules']
+      volumeMounts:
+        - name: redis-modules
+          mountPath: /modules
+  ## @param master.extraVolumes Optionally specify extra list of additional volumes for the Redis&reg; master pod(s)
+  extraVolumes:
+    - name: redis-modules
+      emptyDir: {}
+  ## @param master.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the Redis&reg; master container(s)
+  extraVolumeMounts: 
+    - name: redis-modules
+      mountPath: /modules
+  ## Persistence parameters
+  ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+  persistence:
+    ## @param master.persistence.size Persistent Volume size
+    size: 4Gi
+    
+## @section Redis&reg; replicas configuration parameters
+replica:
+  ## @param replica.replicaCount Number of Redis&reg; replicas to deploy
+  replicaCount: 2
+  ## @param replica.containerPorts.redis Container port to open on Redis&reg; replica nodes
+  containerPorts:
+    redis: 6379
+  ## @param replica.initContainers Add additional init containers to the Redis&reg; replicas pod(s)
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers:
+    - name: install-modules
+      image: redis/redis-stack-server:7.4.0-v1
+      command: ['sh', '-c', 'cp -r /opt/redis-stack/lib/* /modules']
+      volumeMounts:
+        - name: redis-modules
+          mountPath: /modules
+  ## @param replica.extraVolumes Optionally specify extra list of additional volumes for the Redis&reg; replicas pod(s)
+  extraVolumes:
+    - name: redis-modules
+      emptyDir: {}
+  ## @param replica.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the Redis&reg; replicas container(s)
+  extraVolumeMounts: 
+    - name: redis-modules
+      mountPath: /modules
+  ## Persistence Parameters
+  ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+  persistence:
+    ## @param replica.persistence.size Persistent Volume size
+    size: 8Gi
