@@ -8,6 +8,8 @@ This repository contains the manifests and scripts to deploy the application wit
 - kubectl
 - Helm
 
+You can use [SETUP.md](SETUP.md) to install the prerequisites.
+
 ## Configuration
 
 Before deploying the application, you need to configure sealed secrets keys. Just upload all the keys to the [system/sealed-secrets-keys](system/sealed-secrets-keys) directory.

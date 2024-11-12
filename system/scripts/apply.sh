@@ -31,3 +31,15 @@ kubectl apply -f $BASE_PATH/aws-sealed-secret.yaml
 kubectl apply -k github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.36
 
 kubectl apply -f $BASE_PATH/aws-ebs-storage-class.yaml
+
+# Wait for EBS CSI driver to be ready
+kubectl wait --for=condition=available --timeout=600s deployment/ebs-csi-controller -n kube-system
+
+# Taint nodes
+kubectl taint nodes --all ebs.csi.aws.com/agent-not-ready:NoExecute
+
+# Delete aws-ebs-csi-driver nodes
+kubectl delete pods -n kube-system -l app=ebs-csi-node
+
+# Wait for EBS CSI driver nodes to be ready
+kubectl wait --for=condition=ready --timeout=600s pods -n kube-system -l app=ebs-csi-node
