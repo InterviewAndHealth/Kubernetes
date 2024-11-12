@@ -89,7 +89,7 @@ sudo systemctl start kubelet
 exit
 ```
 
-2. Initialize the Kubernetes master node.
+2. Initialize the Kubernetes master node and install helm.
 
 ```bash
 sudo kubeadm config images pull
@@ -98,6 +98,10 @@ sudo kubeadm init
 mkdir -p "$HOME"/.kube
 sudo cp -i /etc/kubernetes/admin.conf "$HOME"/.kube/config
 sudo chown "$(id -u)":"$(id -g)" "$HOME"/.kube/config
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
 ```
 
 3. Generate a token for worker nodes to join the cluster.
