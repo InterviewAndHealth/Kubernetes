@@ -76,7 +76,7 @@ master:
   ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
   persistence:
     ## @param master.persistence.size Persistent Volume size
-    size: 4Gi
+    size: 8Gi
     
 ## @section Redis&reg; replicas configuration parameters
 replica:
